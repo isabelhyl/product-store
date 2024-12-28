@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Product Reviews</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #1b59af;
+      margin: 75px;
+    }
+
+    h1 {
+      color: white;
+      text-align: center;
+    }
+
+    .review {
+      background-color: white;
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 20px;
+      box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+    }
+
+    .review h4 {
+      margin: 0 0 5px;
+    }
+
+    p[type="white"] {
+      color: white;
+      text-align: center;
+    }
+
+    .star {
+      color: #df8e03;
+    }
+  </style>
+</head>
+<body>
+  <h1 id="product-title"></h1>
+  <div id="reviews-container"></div>
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const productId = params.get('productId');
+    const ratingFilter = parseInt(params.get('rating'), 10);
+
+    fetch(`https://dummyjson.com/products/${productId}`)
+      .then(res => {
+        if (!res.ok) {
+          throw new Error(`Failed to fetch product details. Status: ${res.status}`);
+        }
+        return res.json();
+      })
+      .then(product => {
+        document.getElementById('product-title').textContent = `Reviews for ${product.title}`;
+
+        const container = document.getElementById('reviews-container');
+        const reviews = product.reviews || [];
+
+        const filteredReviews = reviews.filter(review => review.rating === ratingFilter);
+
+        if (filteredReviews.length > 0) {
+          filteredReviews.forEach(review => {
+            const reviewDiv = document.createElement('div');
+            reviewDiv.classList.add('review');
+            reviewDiv.innerHTML = `
+              <h4>${review.reviewerName || 'Anonymous'}</h4>
+              <p class="star">${'★'.repeat(review.rating)}${'☆'.repeat(5 - review.rating)}</p>
+              <p>${review.comment}</p>
+              <p><em>${new Date(review.date || Date.now()).toLocaleDateString()}</em></p>
+            `;
+            container.appendChild(reviewDiv);
+          });
+        } else {
+          container.innerHTML = '<p type="white">No reviews available for this rating.</p>';
+        }
+      })
+      .catch(error => {
+        console.error('Error fetching product reviews:', error);
+        document.body.innerHTML = '<p>Unable to load reviews.</p>';
+      });
+  </script>
+</body>
+</html>

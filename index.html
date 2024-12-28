@@ -1,0 +1,177 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Product Categories</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #1b59af;
+      margin: 75px;
+    }
+
+    h1 {
+      text-align: center;
+      color: white;
+    }
+
+    #welcome-message {
+      text-align: center;
+      background-color: white;
+      padding: 20px;
+      border-radius: 20px;
+      margin-bottom: 30px;
+      color: #1b59af;
+      font-size: 24px;
+      font-weight: bold;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .category {
+      font-size: 30px;
+      border-radius: 30px;
+      margin-bottom: 20px;
+      padding: 25px 25px;
+      height: 200px;
+      width: 200px;
+      cursor: pointer;
+      background-color: #f4f4f4;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .category:hover {
+      background-color: #ddd;
+    }
+
+    #categories-container {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 20px; 
+      padding: 20px; 
+      justify-content: center; 
+    }
+
+    img {
+      width: 100px;
+      height: 100px;
+    }
+
+    .navbar {
+      background-color: #f1ca4d;
+      padding: 15px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+    }
+
+    .navbar a {
+      text-decoration: none;
+      color: #1b59af;
+      font-weight: bold;
+      margin: 0 10px;
+    }
+
+    .navbar a:hover {
+      color: #cd9400;
+    }
+
+    .navbar-brand {
+      font-size: 24px;
+      font-weight: bold;
+      color: #1b59af;
+    }
+
+    /* ipad */
+    @media screen and (max-width: 928px) {
+      #categories-container {
+        grid-template-columns: repeat(2, 1fr);
+        justify-content: center; 
+      }
+    }
+
+    /* phone */
+    @media screen and (max-width: 528px) {
+      #categories-container {
+        grid-template-columns: repeat(1, 1fr);
+        justify-content: center; 
+      }
+    }
+
+  </style>
+</head>
+<body>
+
+    <div class="navbar">
+        <div class="navbar-brand">Product Store</div>
+
+        <div>
+          <a href="myOrders.html">My Orders</a>
+          <a href="cart.html">Cart</a>
+        </div>
+
+      </div>
+
+
+  <div id="welcome-message">Welcome to Product Store!</div>
+  <h1>Product Categories</h1>
+  <div id="categories-container"></div>
+  <script>
+    fetch('https://dummyjson.com/products')
+      .then(res => res.json())
+      .then(data => {
+        const products = data.products;
+
+        // extract unique categories
+        const categories = [...new Set(products.map(product => product.category))];
+
+        const container = document.getElementById('categories-container');
+
+        categories.forEach(category => {
+          const categoryDiv = document.createElement('div');
+          categoryDiv.classList.add('category');
+
+          let imageSrc = '';
+          if (category === 'beauty') {
+            imageSrc = 'beautyIcon.png';
+          } else if (category === 'fragrances') {
+            imageSrc = 'fragranceIcon.png';
+          } else if (category === 'furniture') {
+            imageSrc = 'furnitureIcon.png';
+          } else if (category === 'groceries') {
+            imageSrc = 'groceryIcon.png';
+          }
+
+          categoryDiv.innerHTML = `
+            ${imageSrc ? `<img src="${imageSrc}" alt="${category} Icon">` : ''}
+            <span>${category}</span>
+          `;
+
+          categoryDiv.addEventListener('click', () => {
+            window.location.href = `category.html?category=${encodeURIComponent(category)}`;
+          });
+
+          container.appendChild(categoryDiv);
+        });
+      })
+      .catch(error => {
+        console.error('Error fetching categories:', error);
+        document.body.innerHTML = '<p>Unable to load categories.</p>';
+      });
+  </script>
+</body>
+</html>
+
+
+

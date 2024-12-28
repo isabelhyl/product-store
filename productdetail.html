@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Product Details</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #1b59af;
+      margin: 75px;
+    }
+
+    h1 {
+      text-align: center;
+      color: white;
+    }
+
+    .product-box {
+      background-color: white;
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 20px;
+      box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+    }
+
+    .rating-buttons {
+      display: flex;
+      gap: 5px;
+    }
+
+    /* .rating-buttons button {
+      cursor: pointer;
+      padding: 5px 10px;
+      border: none;
+      background-color: #f0f0f0;
+      border-radius: 5px;
+      box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
+    } */
+
+
+    .rating-buttons button {
+      font-size: 14px;
+    }
+
+
+    .rating-buttons button:hover {
+      background-color: #ddd;
+    }
+
+    .star {
+      color: #df8e03;
+    }
+
+    h3[id="reviews"] {
+      color: white;
+    }
+
+    .review {
+      background-color: white;
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 20px;
+      box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+    }
+
+    .review h4 {
+      margin: 0 0 5px;
+    }
+
+    .review p {
+      margin: 5px 0;
+    }
+
+    @media screen and (max-width: 528px) {
+      .rating-buttons {
+        display: flex;
+        flex-direction: column; /* Stacks the buttons vertically */
+        align-items: center; /* Centers the buttons */
+        gap: 10px; /* Adds spacing between buttons */
+        margin-bottom: 20px
+      }
+
+      .rating-buttons button {
+        width: 90%; /* Makes buttons take up most of the screen width */
+        max-width: none; /* Removes max-width restriction for smaller screens */
+        text-align: center; /* Centers the text on the button */
+      }
+    }
+
+    
+  </style>
+</head>
+<body>
+  <h1>Product Details</h1>
+  <div id="product-box" class="product-box"></div>
+  <div id="product-details" class="product-details"></div>
+  <div id="all-reviews" class="all-reviews"></div>
+
+  <script>
+    const params = new URLSearchParams(window.location.search); // retrieving data from the productId = (product ID) from the search parameter defined in category.html
+        // example: https://example.com/productdetail.html?productId=42&name=Phone
+        // params.get('productId') --> "42" 
+    const productId = params.get('productId');
+
+    if (!productId) {
+      document.body.innerHTML = '<p>Product not found.</p>';
+    } else {
+      fetch(`https://dummyjson.com/products/${productId}`)
+        .then(res => {
+          if (!res.ok) {
+            throw new Error(`Failed to fetch product details. Status: ${res.status}`);
+          }
+          return res.json();
+        })
+        .then(product => {
+          const productBox = document.getElementById('product-box');
+          productBox.innerHTML = `
+            <h3>${product.title}</h3>
+            <p><strong>Price:</strong> $${product.price}</p>
+            <p><strong>Discount:</strong> ${product.discountPercentage}%</p>
+            <p><strong>Stock:</strong> ${product.stock}</p>
+            <p><strong>Rating:</strong> ${product.rating} / 5</p>
+            <p><strong>Tags:</strong> ${product.tags.join(', ')}</p>
+            <div class="images">
+              ${product.images.map(img => `<img src="${img}" alt="${product.title}" style="max-width: 200px; margin: 5px;">`).join('')}
+            </div>
+          `;
+
+          const reviewCounts = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+
+          // count reviews by star ratings
+          product.reviews.forEach(review => {
+            if (review.rating >= 1 && review.rating <= 5) {
+              reviewCounts[review.rating]++;
+            }
+          });
+
+          const productDetails = document.getElementById('product-details');
+          productDetails.innerHTML = `
+            <h3 id="reviews">Reviews</h3>
+            <div class="rating-buttons">
+              ${[5, 4, 3, 2, 1].map(star => `
+                <button class="star" onclick="window.location.href='reviews.html?productId=${product.id}&rating=${star}'">
+                  ${'★'.repeat(star)}${'☆'.repeat(5 - star)} (${reviewCounts[star]})
+                </button>
+              `).join('')}
+            </div>
+          `;
+
+          // sort reviews by rating (highest to lowest)
+          const sortedReviews = product.reviews.sort((a, b) => b.rating - a.rating);
+
+          const allReviews = document.getElementById('all-reviews');
+    
+          sortedReviews.forEach(review => {
+            const reviewDiv = document.createElement('div');
+            reviewDiv.classList.add('review');
+            reviewDiv.innerHTML = `
+              <h4>${review.reviewerName || 'Anonymous'}</h4>
+              <p class="star">${'★'.repeat(review.rating)}${'☆'.repeat(5 - review.rating)}</p>
+              <p>${review.comment}</p>
+              <p><em>${new Date(review.date || Date.now()).toLocaleDateString()}</em></p>
+            `;
+            allReviews.appendChild(reviewDiv);
+          });
+        })
+        .catch(error => {
+          console.error('Error fetching product details:', error);
+          document.body.innerHTML = '<p>Unable to load product details.</p>';
+        });
+    }
+  </script>
+  <!-- <button id="postReview" onclick="window.location.href='postReview.html'"><strong>Post your review</strong></button> -->
+   <!-- not possible because this is a read-only API, so I can't modify the API data directly -->
+</body>
+</html>
