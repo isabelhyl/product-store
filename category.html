@@ -277,7 +277,7 @@
 
   if (stockProduct && stockProduct.stock > 0) {
     if (existingProduct) {
-      // Update quantity if stock allows
+      // update quantity if stock allows
       if (stockProduct.stock > existingProduct.quantity) {
         existingProduct.quantity += 1;
       } else {
@@ -285,15 +285,13 @@
         return;
       }
     } else {
-      // Add new product to the cart
+      // add new product to the cart
       cart.push({ ...product, quantity: 1 });
       document.getElementById(`operators-${product.id}`).style.display = 'inline-block';
     }
 
-    // Update stock for the product globally
     stockProduct.stock -= 1;
 
-    // Save updated cart and product data to localStorage
     localStorage.setItem('cart', JSON.stringify(cart));
     localStorage.setItem('productsData', JSON.stringify(productsData));
     updateCartSummary();
